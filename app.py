@@ -46,6 +46,7 @@ section[data-testid="stSidebar"]{display:none;}
 /* Móvil + dark mode: refuerzo del header */
 @media(max-width:768px) and (prefers-color-scheme:dark){
     .header-box   { background:#4D93D9 !important; }
+    .header-box * { background-color:transparent !important; }
     .header-title { color:#FFFFFF !important; }
     .header-sub   { color:#D0E8FF !important; }
 }
@@ -59,10 +60,11 @@ section[data-testid="stSidebar"]{display:none;}
         background-color:#FFFFFF !important;
         color:#111827 !important;
     }
-    /* Preservar header principal */
-    .header-box   { background:#4D93D9 !important; }
-    .header-title { color:#FFFFFF !important; }
-    .header-sub   { color:#D0E8FF !important; }
+    /* Preservar header principal — fondo celeste en box y transparente en hijos */
+    .header-box              { background:#4D93D9 !important; }
+    .header-box *            { background-color:transparent !important; }
+    .header-title            { color:#FFFFFF !important; }
+    .header-sub              { color:#D0E8FF !important; }
     /* Preservar elementos claros */
     .zona-title, .info-box, .scenario-label { background:#D6EAFF !important; }
     .zona-title, .info-box, .info-box b, .info-box *, .scenario-label { color:#0A2463 !important; }
