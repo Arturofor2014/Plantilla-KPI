@@ -13,18 +13,18 @@ st.markdown("""
 <style>
 .main .block-container{max-width:1400px;padding:1.5rem 2rem;overflow-x:auto;}
 section[data-testid="stSidebar"]{display:none;}
-.header-box{background:#4D93D9;padding:5px 32px;
+.header-box{background:#4D93D9 !important;padding:5px 32px;
     border-radius:12px;margin:0 auto 24px;width:80%;}
-.header-title{color:white;font-size:26px;font-weight:900;letter-spacing:2px;}
-.header-sub{color:#D0E8FF;font-size:13px;margin-top:4px;}
-.zona-title{font-size:15px;font-weight:900;color:white;background:#4D93D9;
+.header-title{color:#FFFFFF !important;font-size:26px;font-weight:900;letter-spacing:2px;}
+.header-sub{color:#D0E8FF !important;font-size:13px;margin-top:4px;}
+.zona-title{font-size:15px;font-weight:900;color:#0A2463;background:#D6EAFF;
     padding:8px 20px;border-radius:8px;margin:20px 0 14px;letter-spacing:1px;
     display:inline-block;min-width:460px;text-align:center;}
-.info-box{background:#4D93D9;border-radius:8px;
+.info-box{background:#D6EAFF;border-radius:8px;
     padding:12px 20px;margin:16px auto 8px auto;max-width:860px;
-    font-size:13px;color:white;line-height:1.8;}
-.info-box b{color:white;}
-.scenario-label{font-size:13px;font-weight:700;color:white;background:#4D93D9;
+    font-size:13px;color:#0A2463;line-height:1.8;}
+.info-box b{color:#0A2463;}
+.scenario-label{font-size:13px;font-weight:700;color:#0A2463;background:#D6EAFF;
     padding:6px 24px;border-radius:6px;display:inline-block;letter-spacing:.5px;}
 .kpi-box{background:#ffffff;border-radius:10px;padding:14px 18px;
     box-shadow:0 2px 8px rgba(0,0,0,.08);text-align:center;
@@ -43,6 +43,12 @@ section[data-testid="stSidebar"]{display:none;}
     .kpi-val{font-size:16px !important;}
     .zona-title{font-size:12px !important;padding:8px 12px !important;}
 }
+/* Móvil + dark mode: refuerzo del header */
+@media(max-width:768px) and (prefers-color-scheme:dark){
+    .header-box   { background:#4D93D9 !important; }
+    .header-title { color:#FFFFFF !important; }
+    .header-sub   { color:#D0E8FF !important; }
+}
 /* Forzar light mode en móvil con dark mode del sistema */
 @media(prefers-color-scheme:dark){
     html, body,
@@ -53,11 +59,13 @@ section[data-testid="stSidebar"]{display:none;}
         background-color:#FFFFFF !important;
         color:#111827 !important;
     }
-    /* Preservar colores celeste en todos los elementos */
-    .header-box, .info-box, .zona-title, .scenario-label { background:#4D93D9 !important; }
-    .header-title, .info-box, .info-box b, .info-box *,
-    .zona-title, .scenario-label { color:#FFFFFF !important; }
-    .header-sub { color:#D0E8FF !important; }
+    /* Preservar header principal */
+    .header-box   { background:#4D93D9 !important; }
+    .header-title { color:#FFFFFF !important; }
+    .header-sub   { color:#D0E8FF !important; }
+    /* Preservar elementos claros */
+    .zona-title, .info-box, .scenario-label { background:#D6EAFF !important; }
+    .zona-title, .info-box, .info-box b, .info-box *, .scenario-label { color:#0A2463 !important; }
 }
 </style>""", unsafe_allow_html=True)
 
