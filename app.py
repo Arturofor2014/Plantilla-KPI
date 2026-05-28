@@ -4,9 +4,11 @@ import plotly.graph_objects as go
 import openpyxl, io, os, warnings
 warnings.filterwarnings("ignore")
 
+# ── CONFIGURACIÓN DE PÁGINA ───────────────────────────────────────────────────
 st.set_page_config(page_title="Tax Impact Dashboard", page_icon="📊", layout="wide",
                    initial_sidebar_state="collapsed")
 
+# ── ESTILOS CSS ───────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 .main .block-container{max-width:1400px;padding:1.5rem 2rem;overflow-x:auto;}
@@ -20,10 +22,11 @@ section[data-testid="stSidebar"]{display:none;}
     display:inline-block;min-width:460px;text-align:center;}
 .kpi-box{background:#ffffff;border-radius:10px;padding:14px 18px;
     box-shadow:0 2px 8px rgba(0,0,0,.08);text-align:center;
-    max-width:300px;width:300px;margin-right:10px;}
+    width:100%;box-sizing:border-box;}
 .kpi-lbl{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;
     letter-spacing:.5px;margin-bottom:6px;}
 .kpi-val{font-size:22px;font-weight:900;color:#0A2463;}
+/* Responsive móvil */
 @media(max-width:768px){
     .main .block-container{padding:0.5rem !important;}
     .header-box{padding:14px 16px !important;}
@@ -34,6 +37,7 @@ section[data-testid="stSidebar"]{display:none;}
     .kpi-val{font-size:16px !important;}
     .zona-title{font-size:12px !important;padding:8px 12px !important;}
 }
+/* Forzar light mode en móvil con dark mode del sistema */
 @media(prefers-color-scheme:dark){
     html, body,
     [data-testid="stAppViewContainer"],
@@ -43,9 +47,15 @@ section[data-testid="stSidebar"]{display:none;}
         background-color:#FFFFFF !important;
         color:#111827 !important;
     }
+    /* Preservar colores del header azul */
+    .header-box  { background:#4D93D9 !important; }
+    .header-title{ color:#FFFFFF !important; }
+    .header-sub  { color:#D0E8FF !important; }
 }
 </style>""", unsafe_allow_html=True)
 
+# ── CARGA DE DATOS DESDE GOOGLE SHEETS ───────────────────────────────────────
+# Cache de 5 minutos para evitar recargas innecesarias
 @st.cache_data(ttl=300)
 def cargar():
     import requests
@@ -62,19 +72,25 @@ def cargar():
 
 df_all = cargar()
 
+# ── HELPERS DE FORMATO ────────────────────────────────────────────────────────
 def fmt_v(v, pct=False):
+    # Retorna "—" si el valor es nulo, porcentaje o dólares según el tipo
     if v is None or (isinstance(v, float) and pd.isna(v)): return "—"
     return f"{v*100:.2f}%" if pct else f"${v:,.0f}"
 
 def es_pct_metrica(m):
+    # Métricas que se expresan como porcentaje
     return m in ["CASH ON CASH", "IRR"]
 
+# ── ENCABEZADO PRINCIPAL ──────────────────────────────────────────────────────
 st.markdown("""
 <div class="header-box">
   <div class="header-title">PORTFOLIO — TAX IMPACT DASHBOARD</div>
   <div class="header-sub">Current Value vs Tax-Free Value · CASH ON CASH · IRR · FCF FROM FINANCING</div>
 </div>""", unsafe_allow_html=True)
 
+# ── SECCIÓN: RESUMEN FCF PORTFOLIO ───────────────────────────────────────────
+# Muestra FCF With Tax, Tax-Free y Variance para Zona 1, Zona 2 y Total
 def resumen_fcf(df):
     def get_fcf(zona):
         sub = df[(df["zona"] == zona) & (df["metrica"] == "FCF FROM FINANCING")]
@@ -89,13 +105,16 @@ def resumen_fcf(df):
     st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
 
     def pct_var(base, diff):
+        # Variación porcentual entre escenarios
         if not base or base == 0: return ""
         return f"{diff / base * 100:+.1f}%"
 
     def pct_of(part, total):
+        # Participación de cada zona sobre el total
         if not total or total == 0: return ""
         return f"{part / total * 100:.1f}%"
 
+    # Tres filas: With Tax / Tax-Free / Variance
     filas = [
         [("FCF With Tax — Zone 1", f"${a_z1:,.0f}",  pct_of(a_z1,  a_tot)),
          ("FCF With Tax — Zone 2", f"${a_z2:,.0f}",  pct_of(a_z2,  a_tot)),
@@ -111,6 +130,7 @@ def resumen_fcf(df):
         html = '<div style="display:flex;gap:10px;justify-content:center;margin-bottom:10px;">'
         for lbl, val, pct in fila:
             if pct:
+                # Verde si positivo, rojo si negativo, azul si neutro
                 if pct.startswith("+"):
                     color = "#2ECC71"
                 elif pct.startswith("-"):
@@ -130,6 +150,7 @@ def resumen_fcf(df):
         html += '</div>'
         st.markdown(html, unsafe_allow_html=True)
 
+    # Nota explicativa de los tres escenarios
     st.markdown("""
 <div style="background:#F0F4FA;border-left:4px solid #0070C0;border-radius:6px;
      padding:12px 20px;margin:16px auto 8px auto;max-width:860px;font-size:13px;color:#333;line-height:1.8;">
@@ -140,10 +161,14 @@ def resumen_fcf(df):
     st.markdown("<hr style='border:none;border-top:2px solid #e0e0e0;width:80%;margin:24px auto;'>",
                 unsafe_allow_html=True)
 
+# ── SECCIÓN: KPIs POR ZONA Y PROYECTO ────────────────────────────────────────
+# Permite filtrar por proyecto y muestra métricas en escenario Base vs Tax-Free
 def render_zona_etiquetas(zona, metricas, default_proyecto):
     df_z = df_all[df_all["zona"] == zona]
     opciones = ["All"] + sorted(df_z["proyecto"].unique().tolist())
     default_idx = opciones.index(default_proyecto) if default_proyecto in opciones else 0
+
+    # Selector de proyecto
     _, col_sel, _ = st.columns([0.2, 0.8, 4])
     with col_sel:
         proyecto_sel = st.selectbox("Project:", opciones, index=default_idx,
@@ -152,9 +177,11 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
     st.markdown(f'<div style="text-align:center;"><div class="zona-title">{zona}</div></div>',
                 unsafe_allow_html=True)
 
+    # Filtrar por proyecto seleccionado
     df_p = df_z.copy() if proyecto_sel == "All" else df_z[df_z["proyecto"] == proyecto_sel].copy()
 
     def kpi_card(lbl, val, pct_str, pct_color):
+        # Tarjeta KPI con label, valor principal y variación opcional
         pct_html = (f'<div style="font-size:13px;font-weight:700;color:{pct_color};margin-top:4px;">{pct_str}</div>'
                     if pct_str else
                     '<div style="font-size:13px;margin-top:4px;visibility:hidden;">—</div>')
@@ -167,11 +194,12 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
         )
 
     def render_fila(titulo, campo, color_titulo, show_pct=True):
+        # Renderiza una fila de KPIs para un campo dado (actual o sin_tx)
         st.markdown(
             f'<div style="text-align:center;margin:18px 0 8px;">'
             f'<span style="font-size:13px;font-weight:700;color:{color_titulo};">{titulo}</span>'
             f'</div>', unsafe_allow_html=True)
-        html = '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+        html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:960px;margin:0 auto;">'
         for m in metricas:
             row_m = df_p[df_p["metrica"] == m]
             if row_m.empty:
@@ -185,10 +213,12 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
             val_fmt = fmt_v(val, pct=es_pct_metrica(m))
             if show_pct and base and base != 0:
                 if es_pct_metrica(m):
+                    # Para IRR y COC: diferencia en puntos porcentuales
                     pp = diff * 100
                     pct_str   = f"{pp:+.2f} pp"
                     pct_color = "#2ECC71" if pp >= 0 else "#E74C3C"
                 else:
+                    # Para valores monetarios: variación porcentual
                     pct_change = diff / abs(base) * 100
                     pct_str    = f"{pct_change:+.1f}%"
                     pct_color  = "#2ECC71" if pct_change >= 0 else "#E74C3C"
@@ -202,6 +232,8 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
     render_fila("BASE SCENARIO — WITH TAX", "actual", "#0A2463", show_pct=False)
     st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
     render_fila("TAX-FREE", "sin_tx", "#0070C0", show_pct=True)
+
+    # Nota explicativa de escenarios
     st.markdown("""
 <div style="background:#F0F4FA;border-left:4px solid #0070C0;border-radius:6px;
      padding:12px 20px;margin:20px auto 8px auto;max-width:860px;font-size:13px;color:#333;line-height:1.8;">
@@ -210,9 +242,13 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
 </div>""", unsafe_allow_html=True)
     st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
 
+# ── RENDERIZADO PRINCIPAL ─────────────────────────────────────────────────────
 st.markdown("<div style='margin-top:48px;'></div>", unsafe_allow_html=True)
+
+# Resumen consolidado del portfolio
 resumen_fcf(df_all)
 
+# Zona 1
 render_zona_etiquetas(
     zona             = "ZONA 1",
     metricas         = ["CASH ON CASH", "FCF FROM FINANCING", "IRR"],
@@ -222,6 +258,7 @@ render_zona_etiquetas(
 st.markdown("<hr style='border:none;border-top:2px solid #e0e0e0;width:80%;margin:32px auto;'>",
             unsafe_allow_html=True)
 
+# Zona 2
 render_zona_etiquetas(
     zona             = "ZONA 2",
     metricas         = ["CASH ON CASH", "FCF FROM FINANCING", "IRR"],
