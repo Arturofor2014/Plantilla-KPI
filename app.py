@@ -34,6 +34,16 @@ section[data-testid="stSidebar"]{display:none;}
     .kpi-val{font-size:16px !important;}
     .zona-title{font-size:12px !important;padding:8px 12px !important;}
 }
+@media(prefers-color-scheme:dark){
+    html, body,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"],
+    [data-testid="stMainBlockContainer"],
+    section, div {
+        background-color:#FFFFFF !important;
+        color:#111827 !important;
+    }
+}
 </style>""", unsafe_allow_html=True)
 
 @st.cache_data(ttl=300)
