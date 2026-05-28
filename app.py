@@ -218,7 +218,7 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
             f'<div style="text-align:center;margin:18px 0 8px;">'
             f'<span class="scenario-label">{titulo}</span>'
             f'</div>', unsafe_allow_html=True)
-        html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:960px;margin:0 auto;">'
+        html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:80%;max-width:860px;margin:0 auto 10px;box-sizing:border-box;">'
         for m in metricas:
             row_m = df_p[df_p["metrica"] == m]
             if row_m.empty:
