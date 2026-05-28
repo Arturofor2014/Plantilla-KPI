@@ -17,9 +17,15 @@ section[data-testid="stSidebar"]{display:none;}
     border-radius:12px;margin:0 auto 24px;width:80%;}
 .header-title{color:white;font-size:26px;font-weight:900;letter-spacing:2px;}
 .header-sub{color:#D0E8FF;font-size:13px;margin-top:4px;}
-.zona-title{font-size:15px;font-weight:900;color:#0A2463;background:#DCE6F1;
-    padding:1px 20px;border-radius:8px;margin:20px 0 14px;letter-spacing:1px;
+.zona-title{font-size:15px;font-weight:900;color:white;background:#4D93D9;
+    padding:8px 20px;border-radius:8px;margin:20px 0 14px;letter-spacing:1px;
     display:inline-block;min-width:460px;text-align:center;}
+.info-box{background:#4D93D9;border-radius:8px;
+    padding:12px 20px;margin:16px auto 8px auto;max-width:860px;
+    font-size:13px;color:white;line-height:1.8;}
+.info-box b{color:white;}
+.scenario-label{font-size:13px;font-weight:700;color:white;background:#4D93D9;
+    padding:6px 24px;border-radius:6px;display:inline-block;letter-spacing:.5px;}
 .kpi-box{background:#ffffff;border-radius:10px;padding:14px 18px;
     box-shadow:0 2px 8px rgba(0,0,0,.08);text-align:center;
     width:100%;box-sizing:border-box;}
@@ -47,10 +53,11 @@ section[data-testid="stSidebar"]{display:none;}
         background-color:#FFFFFF !important;
         color:#111827 !important;
     }
-    /* Preservar colores del header azul */
-    .header-box  { background:#4D93D9 !important; }
-    .header-title{ color:#FFFFFF !important; }
-    .header-sub  { color:#D0E8FF !important; }
+    /* Preservar colores celeste en todos los elementos */
+    .header-box, .info-box, .zona-title, .scenario-label { background:#4D93D9 !important; }
+    .header-title, .info-box, .info-box b, .info-box *,
+    .zona-title, .scenario-label { color:#FFFFFF !important; }
+    .header-sub { color:#D0E8FF !important; }
 }
 </style>""", unsafe_allow_html=True)
 
@@ -152,11 +159,10 @@ def resumen_fcf(df):
 
     # Nota explicativa de los tres escenarios
     st.markdown("""
-<div style="background:#F0F4FA;border-left:4px solid #0070C0;border-radius:6px;
-     padding:12px 20px;margin:16px auto 8px auto;max-width:860px;font-size:13px;color:#333;line-height:1.8;">
-  <b style="color:#0A2463;">FCF With Tax</b> — Free cash flow from financing applying the current tax burden (base scenario).<br>
-  <b style="color:#0A2463;">FCF Tax-Free</b> — Free cash flow under the tax exemption benefit.<br>
-  <b style="color:#0A2463;">FCF Variance</b> — Absolute and relative difference between both scenarios; reflects the direct economic impact of the tax benefit.
+<div class="info-box">
+  <b>FCF With Tax</b> — Free cash flow from financing applying the current tax burden (base scenario).<br>
+  <b>FCF Tax-Free</b> — Free cash flow under the tax exemption benefit.<br>
+  <b>FCF Variance</b> — Absolute and relative difference between both scenarios; reflects the direct economic impact of the tax benefit.
 </div>""", unsafe_allow_html=True)
     st.markdown("<hr style='border:none;border-top:2px solid #e0e0e0;width:80%;margin:24px auto;'>",
                 unsafe_allow_html=True)
@@ -193,11 +199,11 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
             '</div>'
         )
 
-    def render_fila(titulo, campo, color_titulo, show_pct=True):
+    def render_fila(titulo, campo, show_pct=True):
         # Renderiza una fila de KPIs para un campo dado (actual o sin_tx)
         st.markdown(
             f'<div style="text-align:center;margin:18px 0 8px;">'
-            f'<span style="font-size:13px;font-weight:700;color:{color_titulo};">{titulo}</span>'
+            f'<span class="scenario-label">{titulo}</span>'
             f'</div>', unsafe_allow_html=True)
         html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:960px;margin:0 auto;">'
         for m in metricas:
@@ -229,16 +235,15 @@ def render_zona_etiquetas(zona, metricas, default_proyecto):
         st.markdown(html, unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
-    render_fila("BASE SCENARIO — WITH TAX", "actual", "#0A2463", show_pct=False)
+    render_fila("BASE SCENARIO — WITH TAX", "actual", show_pct=False)
     st.markdown("<div style='margin-top:28px;'></div>", unsafe_allow_html=True)
-    render_fila("TAX-FREE", "sin_tx", "#0070C0", show_pct=True)
+    render_fila("TAX-FREE", "sin_tx", show_pct=True)
 
     # Nota explicativa de escenarios
     st.markdown("""
-<div style="background:#F0F4FA;border-left:4px solid #0070C0;border-radius:6px;
-     padding:12px 20px;margin:20px auto 8px auto;max-width:860px;font-size:13px;color:#333;line-height:1.8;">
-  <b style="color:#0A2463;">Base Scenario — With Tax</b> — Project metrics under the current tax burden without applying exemption benefits.<br>
-  <b style="color:#0A2463;">Tax-Free</b> — Project metrics applying the tax exemption. The percentage indicates the variance from the base scenario.
+<div class="info-box">
+  <b>Base Scenario — With Tax</b> — Project metrics under the current tax burden without applying exemption benefits.<br>
+  <b>Tax-Free</b> — Project metrics applying the tax exemption. The percentage indicates the variance from the base scenario.
 </div>""", unsafe_allow_html=True)
     st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
 
