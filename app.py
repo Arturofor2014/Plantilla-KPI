@@ -147,7 +147,7 @@ def resumen_fcf(df):
          ("FCF Variance — Total",  f"${s_tot-a_tot:+,.0f}", pct_var(a_tot, s_tot-a_tot))],
     ]
     for fila in filas:
-        html = '<div style="display:flex;gap:10px;justify-content:center;margin-bottom:10px;">'
+        html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:80%;max-width:860px;margin:0 auto 10px;box-sizing:border-box;">'
         for lbl, val, pct in fila:
             if pct:
                 # Verde si positivo, rojo si negativo, azul si neutro
